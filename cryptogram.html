@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptogram Puzzle: Data Science</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        #instructions {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        #cryptogram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        .message-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+        .cipher {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+        }
+        .cipher-letter {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #add8e6;
+            border: 2px solid #333;
+        }
+        .input-box {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            font-size: 16px;
+            border: 2px solid #333;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cryptogram Puzzle: Data Science</h1>
+    <p id="instructions">Decode the two messages about data science and sustainability by replacing each cipher letter with the correct one.</p>
+
+    <div id="cryptogram-container"></div>
+
+    <button id="check-solution">Check Solution</button>
+    <button id="get-hint">Get Hint</button>
+    <button id="show-solution">Show Solution</button>
+    <button id="show-meaning">Show Meaning</button>
+
+    <script>
+        const messages = [
+            {
+                text: "INFORMATION IS THE OIL OF THE 21ST CENTURY, AND ANALYTICS IS THE COMBUSTION ENGINE.",
+                meaning: "Oil is precious but useless if we don’t develop an engine to use it. Similarly, while the quest for quality data is ever-increasing, it’s only useful once we enhance our analytical skills.",
+            },
+            {
+                text: "GREEN COMPUTING IS THE USE OF COMPUTERS AND OTHER COMPUTING DEVICES AND EQUIPMENT IN ENERGY-EFFICIENT AND ECO-FRIENDLY WAYS.",
+                meaning: "IT managers typically focus energy efficiency efforts on data centers, as well as separate equipment rooms and data storage areas that use significant amounts of energy or are affected by its use. For example, upgrading IT systems can help by replacing older equipment that often uses more energy and puts out more heat than newer technologies.",
+            },
+        ];
+
+        const cipherMapping = {
+            'A': 'X', 'B': 'T', 'C': 'L', 'D': 'M', 'E': 'Y', 'F': 'Z', 'G': 'Q', 'H': 'K', 'I': 'U', 'J': 'P',
+            'K': 'H', 'L': 'F', 'M': 'G', 'N': 'V', 'O': 'D', 'P': 'R', 'Q': 'B', 'R': 'N', 'S': 'C', 'T': 'A',
+            'U': 'O', 'V': 'E', 'W': 'W', 'X': 'J', 'Y': 'S', 'Z': 'I'
+        };
+
+        const container = document.getElementById("cryptogram-container");
+
+        messages.forEach((message, msgIndex) => {
+            const title = document.createElement("h2");
+            title.textContent = `Message #${msgIndex + 1}`;
+            container.appendChild(title);
+
+            const cipherPhrase = message.text.split('').map(char => {
+                return cipherMapping[char] || char;
+            }).join('');
+
+            const phraseContainer = document.createElement("div");
+            phraseContainer.classList.add("message-container");
+
+            cipherPhrase.split('').forEach((char, index) => {
+                const cipherDiv = document.createElement("div");
+                cipherDiv.classList.add("cipher");
+
+                const cipherLetter = document.createElement("div");
+                cipherLetter.classList.add("cipher-letter");
+                cipherLetter.textContent = char;
+
+                const inputBox = document.createElement("input");
+                inputBox.classList.add("input-box");
+                inputBox.setAttribute("maxlength", 1);
+                inputBox.dataset.index = index;
+                inputBox.dataset.msgIndex = msgIndex;
+
+                cipherDiv.appendChild(cipherLetter);
+                if (char !== ' ') {
+                    cipherDiv.appendChild(inputBox);
+                }
+
+                phraseContainer.appendChild(cipherDiv);
+            });
+
+            container.appendChild(phraseContainer);
+        });
+
+        document.getElementById("check-solution").addEventListener("click", () => {
+            const userAnswers = messages.map((message, msgIndex) => {
+                return Array.from(document.querySelectorAll(`.input-box[data-msg-index='${msgIndex}']`))
+                    .map(input => input.value.toUpperCase() || ' ')
+                    .join('');
+            });
+
+            let allCorrect = true;
+
+            userAnswers.forEach((userAnswer, index) => {
+                const correctAnswer = messages[index].text.replace(/ /g, '');
+                if (userAnswer !== correctAnswer) {
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                alert("Correct! You've successfully decoded all messages.");
+            } else {
+                alert("Incorrect! Please try again.");
+            }
+        });
+
+        document.getElementById("get-hint").addEventListener("click", () => {
+            const emptyInputs = Array.from(document.querySelectorAll(".input-box"))
+                .filter(input => input.value === '');
+
+            if (emptyInputs.length > 0) {
+                const randomInput = emptyInputs[Math.floor(Math.random() * emptyInputs.length)];
+                const index = randomInput.dataset.index;
+                const msgIndex = randomInput.dataset.msgIndex;
+                const correctLetter = messages[msgIndex].text[index];
+                randomInput.value = correctLetter;
+                alert(`Hint: One of the letters is '${correctLetter}'.`);
+            } else {
+                alert("No empty spaces left to hint.");
+            }
+        });
+
+        document.getElementById("show-solution").addEventListener("click", () => {
+            document.querySelectorAll(".input-box").forEach((input) => {
+                const index = input.dataset.index;
+                const msgIndex = input.dataset.msgIndex;
+                input.value = messages[msgIndex].text[index];
+            });
+            alert("Solution revealed!");
+        });
+
+        document.getElementById("show-meaning").addEventListener("click", () => {
+            let meanings = messages.map((message, index) => `Message #${index + 1}: ${message.meaning}`).join('\n\n');
+            alert(meanings);
+        });
+    </script>
+</body>
+</html>
+
